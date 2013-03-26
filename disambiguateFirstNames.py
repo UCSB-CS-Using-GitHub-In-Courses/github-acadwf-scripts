@@ -26,6 +26,11 @@ sys.path.append("/cs/faculty/pconrad/github/github-acadwf-scripts/PyGithub");
 from github import Github
 from github import GithubException
 
+
+def processLine(lastName,firstName,githubUser,umail,csil):
+    print(firstName + "\t" + lastName + "\t" + githubUser);
+
+
 defaultInputFilename =  '../CS56-S13-data/CS56 S13 Github Userids (Responses) - Form Responses.csv'
 
 parser = argparse.ArgumentParser(description='Disambiguate First Names.')
@@ -35,5 +40,14 @@ parser.add_argument('-i','--infileName',help='input file',
 
 args = parser.parse_args()
 
-print("args.infileName=",args.infileName)
+with open(args.infileName,'r') as f:
+    csvFile = csv.DictReader(f,delimiter=',', quotechar='"')
+
+
+    for line in csvFile:
+        processLine(line["Last Name"],
+                    line["First Name"],
+                    line["github userid"],
+                    line["Umail address"],
+                    line["CSIL userid"])
 
