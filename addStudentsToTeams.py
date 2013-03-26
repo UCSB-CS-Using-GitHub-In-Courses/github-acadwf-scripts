@@ -1,19 +1,17 @@
 #!/usr/bin/python
 
 # This script reads all the users from the CSV file created
-# by the Google Form, and for each it:
+# by the Google Form.
+
+# If first checks for any duplicate first names.  If there are duplicate
+# first names, it deambiguates the first names by adding first letters of
+# the last name until the names are distinguished.
+
+# It then:
 #  (1) checks if the github user exists (bails, if not)
-#  (2) creates the lab00_LastName repo (if not already there)
-#  (3) creates the Student_LastName team (if not already there)
-#        and puts the lab00_LastName repo on that team
-#  (4) adds the github user to the Student_LastName team and AllStudents team
+#  (2) creates the Student_FirstName team (if not already there)
+#  (3) adds the github user to the Student_FirstName team and AllStudents team
 
-
-# TODO: make more user-friendly
-#       refactor into sensible functions
-#       factor out so that this ONLY does the all students team,
-#       and maybe also the Student_LastName team, but not the repos.
-#       Note that the Student_LastName team is push by default.
 
 import getpass
 import csv
