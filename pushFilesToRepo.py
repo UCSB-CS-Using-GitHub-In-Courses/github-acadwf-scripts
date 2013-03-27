@@ -55,8 +55,8 @@ def locateGithubUser(githubUserIdString):
             return user
 
     except GithubException as e:
+        print("No such github user: " + githubUserIdString) 
         print(e)
-        print("No such github user: ",githubUserIdString);
         return False
 
 
@@ -67,12 +67,20 @@ parser = argparse.ArgumentParser(description='push files from labxx_prototype di
 parser.add_argument('lab',metavar='labxx',  
                     help="which lab (e.g. lab00, lab01, etc.)")
 
+parser.add_argument('-f','--firstName', 
+                    help="if passed, only update labxx_FirstName",
+                    default="")
+
+parser.add_argument('-u','--githubUsername', 
+                    help="github username, default is current OS user",
+                    default=getpass.getuser())
+
 args = parser.parse_args()
 
-username = raw_input("Github Username:")
+
 pw = getpass.getpass()
 
-g = Github(username, pw)
+g = Github(args.githubUsername, pw)
 
 org = g.get_organization("UCSB-CS56-S13")
 
@@ -83,17 +91,24 @@ protoDirName = args.lab + "_prototype"
 if (not os.path.isdir(protoDirName)):
     raise Exception(protoDirName + " does not exist.")
 
-# Now look for the repos that match args.lab_*
 
-repos = org.get_repos()
-
-for repo in repos:
-
-    print("repo.name=" + repo.name)
-
-    if (repo.name.startswith(args.lab+"_")):
+if (args.firstName!=""):
+    try:
+        repoName = (args.lab + "_" + args.firstName)
+        repo = org.get_repo(repoName)
         populateRepo(repo)
+    except GithubException as ghe:
+        print("Could not find repo " + repoName + ":" + str(ghe))
 
+else:
+       
+    # User wants to update ALL repos that start with labxx_
+
+    repos = org.get_repos()
+    for repo in repos:
+        if (repo.name.startswith(args.lab+"_")):
+            populateRepo(repo)
+            
 
 
 
