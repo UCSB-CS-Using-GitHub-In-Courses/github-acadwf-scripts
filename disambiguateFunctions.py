@@ -16,11 +16,12 @@ def containsDuplicates(aList):
     >>> containsDuplicates(['bar','foo','bar'])
     True
     """
+    copyList = list(aList)
+
+    copyList.sort()
     
-    aList.sort()
-    
-    for i in range(len(aList)-1):
-        if aList[i]==aList[i+1]:
+    for i in range(len(copyList)-1):
+        if copyList[i]==copyList[i+1]:
             return True
     return False
     
@@ -34,6 +35,18 @@ def firstNamesWithNCharsOfLastName(userList, indices, n):
         
     return names
 
+def disambiguateAllFirstNames(userList):
+    newUserList = list(userList)
+    firstDuplicateName = nameInFirstMatchingPairOfFirstNames(newUserList)
+    while ( firstDuplicateName != False):
+       print("Fixing duplicates for ",firstDuplicateName)
+       indices = findIndicesOfMatchingFirstNames(newUserList,firstDuplicateName)
+       newUserList = disambiguateFirstNamesOfTheseIndices(newUserList,indices)
+       firstDuplicateName = nameInFirstMatchingPairOfFirstNames(newUserList)
+
+    return newUserList
+        
+
 def disambiguateFirstNamesOfTheseIndices(userList,indices):
     "return a new userList with certain first names disambiguated"
     
@@ -42,11 +55,13 @@ def disambiguateFirstNamesOfTheseIndices(userList,indices):
     needed = 1;  # Need up through 0 only (i.e. 1 char)
     
     firstNames = firstNamesWithNCharsOfLastName(userList,indices,needed)
+    #print("firstNames=",firstNames,"needed=",needed)
     
     while( containsDuplicates(firstNames) ):
-        print("firstNames=",firstNames,"needed=",needed)
         needed = needed + 1
         firstNames = firstNamesWithNCharsOfLastName(userList,indices,needed)
+        #print("firstNames=",firstNames,"needed=",needed)
+
         
     for i in range(len(indices)):
         newList[indices[i]]['first'] = firstNames[i]
@@ -86,8 +101,10 @@ class TestSequenceFunctions(unittest.TestCase):
                            makeUserDict('Mary Kay','Jones','mkj','mkj@example.org','mkj'),
                            makeUserDict('Mary','Kay','mkay','mkay@example.org','mkay') ]
 
-
-
+        self.userList1a = [ makeUserDict('Chris_J','Jones','cj','cj@example.org','cj'),
+                           makeUserDict('Chris_S','Smith','cs','cs@example.org','cs'),
+                           makeUserDict('Mary Kay','Jones','mkj','mkj@example.org','mkj'),
+                           makeUserDict('Mary','Kay','mkay','mkay@example.org','mkay') ]
 
         self.userList2 = [ makeUserDict('Chris_J','Jones','cj','cj@example.org','cj'),
                            makeUserDict('Chris_S','Smith','cs','cs@example.org','cs'),
@@ -101,16 +118,33 @@ class TestSequenceFunctions(unittest.TestCase):
                            makeUserDict('Dave','Jones','dj','dk@example.org','dj'),
                            makeUserDict('Dave','Kay','dk','dj@example.org','dk') ]
 
+        self.userList3a = [ makeUserDict('Chris_J','Jones','cj','cj@example.org','cj'),
+                           makeUserDict('Chris_S','Smith','cs','cs@example.org','cs'),
+                           makeUserDict('Mary_J','Jones','mkj','mkj@example.org','mkj'),
+                           makeUserDict('Mary_K','Kay','mkay','mkay@example.org','mkay'),
+                           makeUserDict('Dave_J','Jones','dj','dk@example.org','dj'),
+                           makeUserDict('Dave_K','Kay','dk','dj@example.org','dk') ]
+
+
+
         self.userList4 = [ makeUserDict('Chris','Jones','cj','cj@example.org','cj'),
                            makeUserDict('Mary','Jones','mkj','mkj@example.org','mkj'),
                            makeUserDict('Dave','Kay','dk','dj@example.org','dk') ]
 
         self.userList5 = [   makeUserDict('Mary','Jones','mkj','mkj@example.org','mkj'),
-                             makeUserDict('Chris','Jones','cj','cj@example.org','cj'),
-                             makeUserDict('Chris','Smith','cs','cs@example.org','cs'),
+                             makeUserDict('Chris','Smyth','csmy','cj@example.org','cj'),
+                             makeUserDict('Chris','Smith','csmi','cs@example.org','cs'),
                              makeUserDict('Mary','Kay','mkay','mkay@example.org','mkay'),
                              makeUserDict('Dave','Jones','dj','dk@example.org','dj'),
                              makeUserDict('Dave','Kay','dk','dj@example.org','dk') ]
+
+        self.userList5a = [   makeUserDict('Mary_J','Jones','mkj','mkj@example.org','mkj'),
+                             makeUserDict('Chris_Smy','Smyth','csmy','cj@example.org','cj'),
+                             makeUserDict('Chris_Smi','Smith','csmi','cs@example.org','cs'),
+                             makeUserDict('Mary_K','Kay','mkay','mkay@example.org','mkay'),
+                             makeUserDict('Dave_J','Jones','dj','dk@example.org','dj'),
+                             makeUserDict('Dave_K','Kay','dk','dj@example.org','dk') ]
+
 
     def test_firstNamesWithNCharsOfLastName1(self):
         result = firstNamesWithNCharsOfLastName(self.userList1,[0,1,2,3],1)
@@ -163,6 +197,22 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_findIndicesOfMatchingFirstNames5b(self):
         result = findIndicesOfMatchingFirstNames(self.userList5,'Chris');
         self.assertEqual(result,[1,2]);
+
+    def test_disambiguateAllFirstNames1(self):
+        result = disambiguateAllFirstNames(self.userList1);
+        self.assertEqual(result,self.userList1a);
+
+    def test_disambiguateAllFirstNames3(self):
+        result = disambiguateAllFirstNames(self.userList3);
+        self.assertEqual(result,self.userList3a);
+
+    def test_disambiguateAllFirstNames4(self):
+        result = disambiguateAllFirstNames(self.userList4);
+        self.assertEqual(result,self.userList4);
+
+    def test_disambiguateAllFirstNames5(self):
+        result = disambiguateAllFirstNames(self.userList5);
+        self.assertEqual(result,self.userList5a);
 
 
 if __name__ == '__main__':

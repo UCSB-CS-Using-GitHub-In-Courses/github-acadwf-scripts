@@ -13,6 +13,8 @@
 #  (3) adds the github user to the Student_FirstName team and AllStudents team
 
 
+from string import maketrans
+
 import argparse
 
 
@@ -26,28 +28,44 @@ sys.path.append("/cs/faculty/pconrad/github/github-acadwf-scripts/PyGithub");
 from github import Github
 from github import GithubException
 
+from disambiguateFunctions import makeUserDict
+from disambiguateFunctions import disambiguateAllFirstNames
 
-def processLine(lastName,firstName,githubUser,umail,csil):
-    print(firstName + "\t" + lastName + "\t" + githubUser);
+def convertUserList(csvFile):
+    userList = []
+    for line in csvFile:
+        userList.append(makeUserDict(line["First Name"],
+                                     line["Last Name"],
+                                     line["github userid"],
+                                     line["Umail address"],
+                                     line["CSIL userid"]))
+    
 
+    for user in userList:
+        user["first"] = user["first"].translate(maketrans(" ","_"));
 
+    return userList
+        
+
+                      
 defaultInputFilename =  '../CS56-S13-data/CS56 S13 Github Userids (Responses) - Form Responses.csv'
 
 parser = argparse.ArgumentParser(description='Disambiguate First Names.')
-parser.add_argument('-i','--infileName',help='input file',
+parser.add_argument('-i','--infileName',
+                    help='input file (default: ' + defaultInputFilename+"'",
                     default=defaultInputFilename)
-
 
 args = parser.parse_args()
 
 with open(args.infileName,'r') as f:
     csvFile = csv.DictReader(f,delimiter=',', quotechar='"')
+    
+    userList = convertUserList(csvFile)
 
-
-    for line in csvFile:
-        processLine(line["Last Name"],
-                    line["First Name"],
-                    line["github userid"],
-                    line["Umail address"],
-                    line["CSIL userid"])
+    newUserList = disambiguateAllFirstNames(userList)
+    
+    for line in userList:
+        print(line)
+        
+        
 
