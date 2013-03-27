@@ -14,29 +14,28 @@
 
 
 import getpass
-import csv
 
 import sys
-sys.path.append("/cs/faculty/pconrad/github/github-acadwf-scripts/PyGithub");
 
+import argparse
+
+
+from disambiguateFunctions import makeUserDict
+from disambiguateFunctions import disambiguateAllFirstNames
+from disambiguateFunctions import getUserList
+
+sys.path.append("/cs/faculty/pconrad/github/github-acadwf-scripts/PyGithub");
 
 from github import Github
 from github import GithubException
 
 
-filename =  '../CS56-S13-data/CS56 S13 Github Userids (Responses) - Form Responses.csv'
-
-
-username = raw_input("Github Username:")
-pw = getpass.getpass()
-
-g = Github(username, pw)
-
-org = g.get_organization("UCSB-CS56-S13")
-
 def processLine(lastName,firstName,githubUser,umail,csil):
     print(firstName + "\t" + lastName + "\t" + githubUser);
 
+
+    ### TODO: Factor out into a function 
+    
     try:
         user = g.get_user(githubUser)
         if (user == None):
@@ -49,41 +48,17 @@ def processLine(lastName,firstName,githubUser,umail,csil):
         print("No such github user: ",githubUser);
         return
 
+    ### FACTOR OUT INTO FUNCTION of LINE in userList
 
+    teamName =             "Student_" + firstName  # name -- string
 
-    desc = "Github repo for lab00 for " + firstName + " " + lastName + " <" + umail + ">"
-
-    repoName =             "lab00_" + lastName  # name -- string
-    teamName =             "Student_" + lastName  # name -- string
-
-    try:  
-        repo = org.create_repo(
-            repoName,
-            "lab00 for CS56 for " + firstName + " " + lastName, # description 
-            "http://www.cs.ucsb.edu/~" + csil, # homepage -- string
-            True, # private -- bool
-            True, # has_issues -- bool
-            True, # has_wiki -- bool
-            True, # has_downloads -- bool
-            auto_init=True,
-            gitignore_template="Java")
-    except GithubException as e:
-       print (e)
-
-    repo = org.get_repo(repoName);
-    
-    #  NotSet, # team_id -- github.Team.Team
-    #  True, # auto_init -- bool
-    #  "Java") # gitignore_template -- string
-    
-    # CREATE THE Student_LastName team,
-    #   add the repo we just created,
+    # CREATE THE Student_FirstName team,
     #   and add the student's github userid to that team.
 
     team = False   # Sentinel to see if it succeeded or failed
     try:
         team = org.create_team(teamName,
-                     [repo],
+                     [],
                      "push");
         team.add_to_members(user);
     except GithubException as e:
@@ -119,14 +94,32 @@ def find_team(org,teamName):
             return team
     return False
 
-with open(filename,'rb') as f:
-    csvFile = csv.DictReader(f,delimiter=',', quotechar='"')
-    for line in csvFile:
-        processLine(line["Last Name"],
-                    line["First Name"],
-                    line["github userid"],
-                    line["Umail address"],
-                    line["CSIL userid"])
+
+
+username = raw_input("Github Username:")
+pw = getpass.getpass()
+
+g = Github(username, pw)
+
+org = g.get_organization("UCSB-CS56-S13")
+
+                      
+defaultInputFilename =  '../CS56-S13-data/CS56 S13 Github Userids (Responses) - Form Responses.csv'
+
+parser = argparse.ArgumentParser(description='Disambiguate First Names.')
+parser.add_argument('-i','--infileName',
+                    help='input file (default: ' + defaultInputFilename+"'",
+                    default=defaultInputFilename)
+
+args = parser.parse_args()
+
+userList = getUserList(args.infileName)
+
+for line in userList:
+    processLine(line['last'],line['first'],line['github'],line['email'],line['csil'])
+        
+
+
 
 
 
