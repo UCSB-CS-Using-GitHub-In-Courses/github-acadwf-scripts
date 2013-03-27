@@ -12,27 +12,21 @@
 #  (2) creates the Student_FirstName team (if not already there)
 #  (3) adds the github user to the Student_FirstName team and AllStudents team
 
-
 import getpass
-
 import sys
-
 import argparse
-
 
 from disambiguateFunctions import makeUserDict
 from disambiguateFunctions import disambiguateAllFirstNames
 from disambiguateFunctions import getUserList
 
-sys.path.append("/cs/faculty/pconrad/github/github-acadwf-scripts/PyGithub");
+sys.path.append("./PyGithub");
 
 from github import Github
 from github import GithubException
 
-
 def processLine(lastName,firstName,githubUser,umail,csil):
     print(firstName + "\t" + lastName + "\t" + githubUser);
-
 
     ### TODO: Factor out into a function 
     
@@ -96,10 +90,10 @@ def find_team(org,teamName):
 
 
 
-username = raw_input("Github Username:")
+
 pw = getpass.getpass()
 
-g = Github(username, pw)
+g = Github(args.githubUsername, pw)
 
 org = g.get_organization("UCSB-CS56-S13")
 
@@ -110,6 +104,10 @@ parser = argparse.ArgumentParser(description='Disambiguate First Names.')
 parser.add_argument('-i','--infileName',
                     help='input file (default: ' + defaultInputFilename+"'",
                     default=defaultInputFilename)
+
+parser.add_argument('-u','--githubUsername', 
+                    help="github username, default is current OS user",
+                    default=getpass.getuser())
 
 args = parser.parse_args()
 
