@@ -14,9 +14,10 @@ import sys
 import argparse
 
 import os
+import subprocess
 
-PyGitHubLocs = ["/cs/faculty/pconrad/github/github-acadwf-scripts/PyGithub",
-                "./PyGithub"]
+PyGitHubLocs = ["./PyGithub"] # list of where to look for PyGithub
+
 #  "/Users/pconrad/github/github-acadwf-scripts/PyGithub"]
 
 for loc in PyGitHubLocs:
@@ -28,8 +29,10 @@ from github import Github
 from github import GithubException
 
 
-def populateRepo(repo):
-    print("Populating repo " + repo.name)
+def populateRepo(repo,protoDir,scratchDir):
+    callList = ["./populateRepo.sh",repo.name,repo.ssh_url,protoDir,scratchDir]
+    print ("Calling " + " ".join(callList))
+    subprocess.call(callList)
 
 
 def find_team(org,teamName):
@@ -75,6 +78,11 @@ parser.add_argument('-u','--githubUsername',
                     help="github username, default is current OS user",
                     default=getpass.getuser())
 
+parser.add_argument('-s','--scratchDirName', 
+                    help="scratch directory to clone repos in while doing work",
+                    default="./scratchRepos")
+
+
 args = parser.parse_args()
 
 
@@ -91,12 +99,17 @@ protoDirName = args.lab + "_prototype"
 if (not os.path.isdir(protoDirName)):
     raise Exception(protoDirName + " does not exist.")
 
+if (not os.path.isdir(args.scratchDirName)):
+    raise Exception(args.scratchDirName + " does not exist.")
+
+protoDirName = os.path.abspath(protoDirName)
+scratchDirName = os.path.abspath(args.scratchDirName)
 
 if (args.firstName!=""):
     try:
         repoName = (args.lab + "_" + args.firstName)
         repo = org.get_repo(repoName)
-        populateRepo(repo)
+        populateRepo(repo,protoDirName,scratchDirName)
     except GithubException as ghe:
         print("Could not find repo " + repoName + ":" + str(ghe))
 
@@ -107,7 +120,7 @@ else:
     repos = org.get_repos()
     for repo in repos:
         if (repo.name.startswith(args.lab+"_")):
-            populateRepo(repo)
+            populateRepo(repo,protoDirName,scratchDirName)
             
 
 
