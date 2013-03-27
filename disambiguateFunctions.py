@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 import unittest
-
-
+import csv
+from string import maketrans
 
 def containsDuplicates(aList):
     """Does list contain a duplicate
@@ -90,6 +90,33 @@ def findIndicesOfMatchingFirstNames(userList,name):
 
 def makeUserDict(first,last,github,email,csil):
     return {'first': first, 'last': last, 'github': github, 'email':email, 'csil':csil }
+
+
+def convertUserList(csvFile):
+    userList = []
+    for line in csvFile:
+        userList.append(makeUserDict(line["First Name"],
+                                     line["Last Name"],
+                                     line["github userid"],
+                                     line["Umail address"],
+                                     line["CSIL userid"]))
+    
+
+    for user in userList:
+        user["first"] = user["first"].translate(maketrans(" ","_"));
+
+    return userList
+        
+def getUserList(csvFilename):
+
+    with open(csvFilename,'r') as f:
+        csvFile = csv.DictReader(f,delimiter=',', quotechar='"')
+    
+        userList = convertUserList(csvFile)
+        
+        newUserList = disambiguateAllFirstNames(userList)
+
+        return newUserList
 
 class TestSequenceFunctions(unittest.TestCase):
 

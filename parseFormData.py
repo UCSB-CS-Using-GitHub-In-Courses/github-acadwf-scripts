@@ -13,39 +13,13 @@
 #  (3) adds the github user to the Student_FirstName team and AllStudents team
 
 
-from string import maketrans
 
 import argparse
 
 
-import getpass
-import csv
-
-import sys
-sys.path.append("/cs/faculty/pconrad/github/github-acadwf-scripts/PyGithub");
-
-
-from github import Github
-from github import GithubException
-
 from disambiguateFunctions import makeUserDict
 from disambiguateFunctions import disambiguateAllFirstNames
-
-def convertUserList(csvFile):
-    userList = []
-    for line in csvFile:
-        userList.append(makeUserDict(line["First Name"],
-                                     line["Last Name"],
-                                     line["github userid"],
-                                     line["Umail address"],
-                                     line["CSIL userid"]))
-    
-
-    for user in userList:
-        user["first"] = user["first"].translate(maketrans(" ","_"));
-
-    return userList
-        
+from disambiguateFunctions import getUserList
 
                       
 defaultInputFilename =  '../CS56-S13-data/CS56 S13 Github Userids (Responses) - Form Responses.csv'
@@ -57,15 +31,12 @@ parser.add_argument('-i','--infileName',
 
 args = parser.parse_args()
 
-with open(args.infileName,'r') as f:
-    csvFile = csv.DictReader(f,delimiter=',', quotechar='"')
-    
-    userList = convertUserList(csvFile)
+userList = getUserList(args.infileName)
 
-    newUserList = disambiguateAllFirstNames(userList)
-    
-    for line in userList:
-        print(line)
+for line in userList:
+    print(line)
+
+
         
         
 
