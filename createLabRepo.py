@@ -30,14 +30,15 @@ sys.path.append("./PyGithub");
 from github import Github
 from github import GithubException
 
+from find_team import find_team
 
-def find_team(org,teamName):
-
-    teams = org.get_teams();
-    for team in teams:
-        if team.name == teamName:
-            return team
-    return False
+#def find_team(org,teamName):
+#
+#    teams = org.get_teams();
+#    for team in teams:
+#        if team.name == teamName:
+#            return team
+#    return False
 
 
 

@@ -35,13 +35,6 @@ def populateRepo(repo,protoDir,scratchDir):
     subprocess.call(callList)
 
 
-def find_team(org,teamName):
-
-    teams = org.get_teams();
-    for team in teams:
-        if team.name == teamName:
-            return team
-    return False
 
 
 

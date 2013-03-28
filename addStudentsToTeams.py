@@ -22,6 +22,7 @@ from disambiguateFunctions import makeUserDict
 from disambiguateFunctions import disambiguateAllFirstNames
 from disambiguateFunctions import getUserList
 
+from find_team import find_team
 
 
 def printf(str,*args):
@@ -113,18 +114,18 @@ def processLine(g,lastName,firstName,githubUser,umail,csil):
     except GithubException as e:
        print (e)
 
-def find_team(org,teamName):
-
-    # TODO: Consider doing some caching here
-    #  to speed things up rather than getting all the
-    #  teams every time.   Store them in a dictionary
-    #  by team name for fast look up later.
-
-    teams = org.get_teams();
-    for team in teams:
-        if team.name == teamName:
-            return team
-    return False
+#def find_team(org,teamName):
+#
+#    # TODO: Consider doing some caching here
+#    #  to speed things up rather than getting all the
+#    #  teams every time.   Store them in a dictionary
+#    #  by team name for fast look up later.
+#
+#    teams = org.get_teams();
+#    for team in teams:
+#        if team.name == teamName:
+#            return team
+#    return False
 
 
 
