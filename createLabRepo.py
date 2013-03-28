@@ -12,6 +12,7 @@
 #  (2) creates the Student_FirstName team (if not already there)
 #  (3) adds the github user to the Student_FirstName team and AllStudents team
 
+from __future__ import print_function
 
 import getpass
 
@@ -24,7 +25,7 @@ from disambiguateFunctions import makeUserDict
 from disambiguateFunctions import disambiguateAllFirstNames
 from disambiguateFunctions import getUserList
 
-sys.path.append("/cs/faculty/pconrad/github/github-acadwf-scripts/PyGithub");
+sys.path.append("./PyGithub");
 
 from github import Github
 from github import GithubException
@@ -49,24 +50,18 @@ def locateGithubUser(githubUserIdString):
             print("No such github user: ",githubUserIdString)
             return False
         else:
-            print("Found user: " + user.login);
+            print(" found user: " + user.login,end='');
             return user
 
     except GithubException as e:
-        print(e)
         print("No such github user: ",githubUserIdString);
         return False
 
 
 def createRepo(labNumber,githubUserObject,githubTeamObject, firstName,csil):
 
-    ## REFACTOR INTO FUNCTION THAT TAKES lab00 as parameter
-
     desc = "Github repo for " + labNumber + " for " + firstName
-
     repoName =            labNumber + "_" + firstName  # name -- string
-
-
     try:  
         repo = org.create_repo(
             repoName,
@@ -79,13 +74,15 @@ def createRepo(labNumber,githubUserObject,githubTeamObject, firstName,csil):
             team_id=githubTeamObject,
             auto_init=True,
             gitignore_template="Java")
+        print(" Created repo "+repoName)
     except GithubException as e:
-       print (e)
+       if e.data['errors'][0]['message']=='name already exists on this account':
+           print(" repo {0} already exists".format(repoName))
+       else:
+           print (e)
 
-    
-    
 
-def processLine(lastName,firstName,githubUser,umail,csil):
+def processLine(lab,lastName,firstName,githubUser,umail,csil):
     print(firstName + "\t" + lastName + "\t" + githubUser);
     
     githubUserObject = locateGithubUser(githubUser)
@@ -99,33 +96,43 @@ def processLine(lastName,firstName,githubUser,umail,csil):
     githubTeamObject = find_team(org,teamName);
 
     if (githubTeamObject == False):
-        print("ERROR: could not find team: " + teamName);
+        print("ERROR: could not find team: " + teamName)
+        print("RUN THE addStudentsToTeams script first!")
         return
     
-    createRepo("lab00",githubUserObject,githubTeamObject,firstName,csil)
-
-
-username = raw_input("Github Username:")
-pw = getpass.getpass()
-
-g = Github(username, pw)
-
-org = g.get_organization("UCSB-CS56-S13")
-
+    createRepo(lab,githubUserObject,githubTeamObject,firstName,csil)
                       
 defaultInputFilename =  '../CS56-S13-data/CS56 S13 Github Userids (Responses) - Form Responses.csv'
 
 parser = argparse.ArgumentParser(description='Disambiguate First Names.')
+parser.add_argument('lab',metavar='labxx',  
+                    help="which lab (e.g. lab00, lab01, etc.)")
 parser.add_argument('-i','--infileName',
                     help='input file (default: ' + defaultInputFilename+"'",
                     default=defaultInputFilename)
+parser.add_argument('-u','--githubUsername', 
+                    help="github username, default is current OS user",
+                    default=getpass.getuser())
 
 args = parser.parse_args()
+
+
+pw = getpass.getpass()
+g = Github(args.githubUsername, pw)
+
+org = g.get_organization("UCSB-CS56-S13")
+
+lab = args.lab
 
 userList = getUserList(args.infileName)
 
 for line in userList:
-    processLine(line['last'],line['first'],line['github'],line['email'],line['csil'])
+    processLine(lab,
+                line['last'],
+                line['first'],
+                line['github'],
+                line['email'],
+                line['csil'])
         
 
 
