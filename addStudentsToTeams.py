@@ -22,8 +22,7 @@ from disambiguateFunctions import makeUserDict
 from disambiguateFunctions import disambiguateAllFirstNames
 from disambiguateFunctions import getUserList
 
-from find_team import find_team
-
+from github_acadwf import find_team
 
 def printf(str,*args):
    print(str % args, end='')
