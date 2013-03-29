@@ -41,8 +41,8 @@ args = parser.parse_args()
 
 pw = getpass.getpass()
 g = Github(args.githubUsername, pw)
-
-addStudentsFromFileToTeams(g,"UCSB-CS56-S13",args.infileName)
+org= g.get_organization("UCSB-CS56-S13")
+addStudentsFromFileToTeams(g,org,args.infileName)
 
 
         

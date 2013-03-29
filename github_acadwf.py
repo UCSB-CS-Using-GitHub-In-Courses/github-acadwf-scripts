@@ -5,19 +5,68 @@
 from __future__ import print_function
 import sys
 
+def populateRepo(repo,protoDir,scratchDir):
+    import subprocess
+    callList = ["./populateRepo.sh",repo.name,repo.ssh_url,protoDir,scratchDir]
+    print ("Calling " + " ".join(callList))
+    subprocess.call(callList)
+
+def pushFilesToRepo(g,org,lab,firstName,scratchDirName):
+
+    addPyGithubToPath()
+    from github import GithubException
+
+    import os
+
+    protoDirName = lab + "_prototype"
+    
+    # check to see if protoDirName exists.  If not, bail
+    
+    if (not os.path.isdir(protoDirName)):
+        raise Exception(protoDirName + " does not exist.")
+
+    if (not os.path.isdir(scratchDirName)):
+        raise Exception(scratchDirName + " does not exist.")
+
+    protoDirName = os.path.abspath(protoDirName)
+    scratchDirName = os.path.abspath(scratchDirName)
+
+    if (firstName!=""):
+        try:
+            repoName = (lab + "_" + firstName)
+            repo = org.get_repo(repoName)
+            populateRepo(repo,protoDirName,scratchDirName)
+        except GithubException as ghe:
+            print("Could not find repo " + repoName + ":" + str(ghe))
+            
+    else:
+            
+        # User wants to update ALL repos that start with labxx_
+        
+        repos = org.get_repos()
+        for repo in repos:
+            if (repo.name.startswith(lab+"_")):
+                populateRepo(repo,protoDirName,scratchDirName)
+            
+
+
+
+
+
+
+
 def addPyGithubToPath():
     pathToPyGithub="./PyGithub";
     if not pathToPyGithub in sys.path:
         sys.path.append("./PyGithub")
 
-def addStudentsFromFileToTeams(g,orgName,infileName):
+def addStudentsFromFileToTeams(g,org,infileName):
     
     addPyGithubToPath()
     from github import GithubException
     from disambiguateFunctions import getUserList
     
     try:
-        org = g.get_organization(orgName)
         
         userList = getUserList(infileName)
         
@@ -61,11 +110,9 @@ def addStudentToTeams(g,org,lastName,firstName,githubUser,umail,csil):
     except GithubException as e:
        print (e)
 
-def createLabRepo(g,orgName,infileName,lab):
+def createLabRepo(g,org,infileName,lab):
 
     from disambiguateFunctions import getUserList
-
-    org = g.get_organization(orgName)
 
     userList = getUserList(infileName)
 

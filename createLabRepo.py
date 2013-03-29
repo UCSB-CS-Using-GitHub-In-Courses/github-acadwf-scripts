@@ -30,20 +30,6 @@ sys.path.append("./PyGithub");
 
 from github import Github
 from github import GithubException
-
-from find_team import find_team
-
-#def find_team(org,teamName):
-#
-#    teams = org.get_teams();
-#    for team in teams:
-#        if team.name == teamName:
-#            return team
-#    return False
-
-
-
-
                       
 defaultInputFilename =  '../CS56-S13-data/CS56 S13 Github Userids (Responses) - Form Responses.csv'
 
@@ -61,8 +47,9 @@ args = parser.parse_args()
 
 pw = getpass.getpass()
 g = Github(args.githubUsername, pw)
+org= g.get_organization("UCSB-CS56-S13")
 
-createLabRepo(g,"UCSB-CS56-S13",args.infileName,args.lab)
+createLabRepo(g,org,args.infileName,args.lab)
 
 
 
