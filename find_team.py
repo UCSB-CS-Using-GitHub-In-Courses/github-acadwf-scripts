@@ -1,5 +1,3 @@
-import sys
-
 
 def find_team(org,teamName,refresh=False):
 
