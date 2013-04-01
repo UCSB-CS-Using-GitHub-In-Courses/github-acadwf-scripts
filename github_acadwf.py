@@ -60,31 +60,141 @@ def addPyGithubToPath():
     if not pathToPyGithub in sys.path:
         sys.path.append("./PyGithub")
 
+
 def addStudentsFromFileToTeams(g,org,infileName):
     
     addPyGithubToPath()
-    from github import GithubException
     from disambiguateFunctions import getUserList
     
-    try:
+    userList = getUserList(infileName)
+    
+    for line in userList:
+        result = addStudentToTeams(g,org,
+                          line['last'],
+                          line['first'],
+                          line['github'],
+                          line['umail'],
+                          line['csil'])
+
+def updateStudentsFromFileForLab(g,org,infileName,lab,scratchDirName,firstName=''):
+
+    """
+    firstName='' means updateAllStudents
+    """
+
+    addPyGithubToPath()
+    from disambiguateFunctions import getUserList
+    
+    userList = getUserList(infileName)
+
+    for line in userList:
         
-        userList = getUserList(infileName)
+        if ( firstName=="" or line['first']==firstName ):
         
-        for line in userList:
-            addStudentToTeams(g,
-                              org,
-                              line['last'],
-                              line['first'],
-                              line['github'],
-                              line['email'],
-                              line['csil'])
+            result = addStudentToTeams(g,org,
+                                       line['last'],
+                                       line['first'],
+                                       line['github'],
+                                       line['email'],
+                                       line['csil'])
             
-    except GithubException as ghe:
-        print(ghe)
-   
+            result = createLabRepoForThisUser(g,org,lab,
+                                              line['last'],line['first'],line['github'],
+                                              line['email'],line['csil'])
+            
+            if (result):
+                pushFilesToRepo(g,org,lab,line['first'],scratchDirName)
+                
+        
+
+def updateAllStudentsFromFileForLab(g,org,infileName,lab,scratchDirName):
+
+    
+    addPyGithubToPath()
+    from disambiguateFunctions import getUserList
+    
+    userList = getUserList(infileName)
+
+    for line in userList:
+        
+        result = addStudentToTeams(g,org,
+                                       line['last'],
+                          line['first'],
+                          line['github'],
+                          line['email'],
+                          line['csil'])
+
+        result = createLabRepoForThisUser(g,org,lab,
+                                 line['last'],line['first'],line['github'],
+                                 line['email'],line['csil'])
+        
+        if (result):
+            pushFilesToRepo(g,org,lab,line['first'],scratchDirName)
+
+
+def addUserToTeam(team,user,quiet=False):
+    "A wrapper for team.add_to_members(user).  Returns true on success"
+
+    addPyGithubToPath()
+    from github import GithubException
+
+    try:
+       team.add_to_members(user);
+       if not quiet:
+           print(
+           "user {0} added to {1}...".format( user.login, team.name) , end='')
+       return True
+    except GithubException as e:
+       print (e)
+       
+    return False
+
 
 def addStudentToTeams(g,org,lastName,firstName,githubUser,umail,csil):
+    """
+    return True if new, False if everthing already existed.
+    Only creates team and adds if wasn't already on the teams
+    """
 
+    print("addStudentToTeams: {0} {1} (github: {2})...".format(
+            firstName,lastName,githubUser),end='')
+
+    studentTeam = getStudentFirstNameTeam(org, firstName)
+    if (studentTeam != False):
+        print("Team {0} exists...".format(studentTeam.name),end='')
+    else:
+        studentTeam = createTeamStudentFirstNameTeam(org,firstName)
+        from types import NoneType
+        if type(studentTeam)==NoneType:
+            print("Error creating student first name team for {0}".format(firstName))
+            sys.exit(1)
+    
+
+    studentGithubUser = findUser(g,githubUser)
+    if (studentGithubUser == False):
+        print ("github user {0} for {1} {2} does not exist".format(githubUser,firstName,lastName))
+        return False       
+
+    result = addUserToTeam(studentTeam,studentGithubUser,quiet=False)
+
+    if (result):
+        result = addUserToTeam(
+            getAllStudentsTeam(org),studentGithubUser,quiet=False)
+    
+    return result
+               
+def  getStudentFirstNameTeam(org,firstName):
+    return findTeam(org,formatStudentTeamName(firstName))
+
+def  getAllStudentsTeam(org):
+    return findTeam(org,"AllStudents")
+
+    
+
+
+def createStudentFirstNameTeamAndAddStudent(g,org,
+                                       lastName,firstName,
+                                       githubUser,umail,csil):
     addPyGithubToPath()
     from github import GithubException
 
@@ -95,8 +205,23 @@ def addStudentToTeams(g,org,lastName,firstName,githubUser,umail,csil):
     if (user==False):
        return
 
-    team = createTeam_Student_FirstName(org,user,firstName)
+    team = createTeamStudentFirstNameTeam(org,firstName)
     if (team==False):
+       return
+
+def addStudentToAllStudentsTeam(g,
+                                org,
+                                lastName,
+                                firstName,
+                                githubUser,
+                                umail,csil):
+
+    addPyGithubToPath()
+    from github import GithubException
+
+    user = findUser(g,githubUser)
+
+    if (user==False):
        return
     
     # TRY ADDING STUDENT TO THE AllStudents team
@@ -105,7 +230,7 @@ def addStudentToTeams(g,org,lastName,firstName,githubUser,umail,csil):
         allStudentsTeam = findTeam(org,"AllStudents");
         if (allStudentsTeam != False):
            allStudentsTeam.add_to_members(user);
-           print("... added to AllStudents\n")
+           print("... {0}({1}) added to AllStudents\n".format(firstName,githubuser))
 
     except GithubException as e:
        print (e)
@@ -139,19 +264,21 @@ def createLabRepoForThisUser(g,
 
     if (githubUserObject == False):
         print("ERROR: could not find github user: " + githubUser);
-        return
+        return False
 
-    teamName =             "Student_" + firstName  # name -- string
+    teamName = formatStudentTeamName(firstName)
 
     githubTeamObject = findTeam(org,teamName);
 
     if (githubTeamObject == False):
         print("ERROR: could not find team: " + teamName)
         print("RUN THE addStudentsToTeams script first!")
-        return
+        return False
     
-    createRepoForOrg(org,lab,githubUserObject,githubTeamObject,firstName,csil)
+    return createRepoForOrg(org,lab,
+                            githubUserObject,githubTeamObject,firstName,csil)
 
+    
 
 def createRepoForOrg(org,labNumber,githubUserObject,githubTeamObject, firstName,csil):
 
@@ -174,13 +301,14 @@ def createRepoForOrg(org,labNumber,githubUserObject,githubTeamObject, firstName,
             auto_init=True,
             gitignore_template="Java")
         print(" Created repo "+repoName)
+        return True
     except GithubException as e:
-       if e.data['errors'][0]['message']=='name already exists on this account':
+       if 'errors' in e.data and 'message' in e.data['errors'][0] and e.data['errors'][0]['message']=='name already exists on this account':
            print(" repo {0} already exists".format(repoName))
        else:
            print (e)
 
-
+    return False
 
 def findUser(g,githubUser,quiet=False):
     "wraps the get_user method of the Github object"
@@ -204,12 +332,17 @@ def findUser(g,githubUser,quiet=False):
             print("No such github user: ",githubUser);
         return False
 
-def   createTeam_Student_FirstName(org,user,firstName,quiet=False):
+def formatStudentTeamName(firstName):
+       return "Student_" + firstName  # name -- string
+
+
+def createTeamStudentFirstNameTeam(org,firstName,quiet=False):
+    "Only creates the team---doesn't add the student as a member"
 
     addPyGithubToPath()
     from github import GithubException
 
-    teamName =             "Student_" + firstName  # name -- string
+    teamName = formatStudentTeamName(firstName)
 
     # Try to create the team
 
@@ -242,19 +375,6 @@ def   createTeam_Student_FirstName(org,user,firstName,quiet=False):
                teamName))
        return False
         
-    # If the create failed (e.g. team already exists)
-    # still go ahead and try to add the student to the team
-
-    try:
-       team.add_to_members(user);
-       if not quiet:
-           print(
-           "user {0} added to {1}...".format( user.login, teamName) , end='')
-       return team
-    except GithubException as e:
-       print (e)
-       
-    return False
 
 def findTeam(org,teamName,refresh=False):
 

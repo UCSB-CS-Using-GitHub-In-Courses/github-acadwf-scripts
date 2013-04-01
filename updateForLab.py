@@ -7,20 +7,23 @@
 # first names, it deambiguates the first names by adding first letters of
 # the last name until the names are distinguished.
 
-# It then:
-#  (1) checks if the github user exists (bails, if not)
-#  (2) creates the Student_FirstName team (if not already there)
-#  (3) adds the github user to the Student_FirstName team and AllStudents team
-
+# It then,for each student
+#  (1) creates the Student_FirstName team (if not already there)
+#  (2) adds the github user id to that team
+#  (3) adds the github user it to the AllStudents team
+#  (4) creates a repo for the student (if it doesn't already exist)
+#  (5) populates it, but only if it was JUST created.
 
 import getpass
 import argparse
+import os
+import sys
 
 from github_acadwf import addPyGithubToPath
-from github_acadwf import addStudentsFromFileToTeams
-from github_acadwf import createLabRepo
-from github_acadwf import findTeam
-from github_acadwf import pushFilesToRepo
+from github_acadwf import updateStudentsFromFileForLab
+#from github_acadwf import createLabRepo
+#from github_acadwf import findTeam
+#from github_acadwf import pushFilesToRepo
 
 addPyGithubToPath()
 
@@ -29,7 +32,11 @@ from github import GithubException
                       
 defaultInputFilename =  '../CS56-S13-data/CS56 S13 Github Userids (Responses) - Form Responses.csv'
 
-parser = argparse.ArgumentParser(description='Complete update for lab00')
+parser = argparse.ArgumentParser(description='Update for lab only for new users')
+
+parser.add_argument('lab',metavar='labxx',  
+                    help="which lab (e.g. lab00, lab01, etc.)")
+
 parser.add_argument('-i','--infileName',
                     help='input file (default: ' + defaultInputFilename+"'",
                     default=defaultInputFilename)
@@ -42,35 +49,23 @@ parser.add_argument('-s','--scratchDirName',
                     help="scratch directory to clone repos in while doing work",
                     default="./scratchRepos")
 
+parser.add_argument('-f','--firstName', 
+                    help="if passed, only update labxx_FirstName",
+                    default="")
+
 args = parser.parse_args()
+
+if not os.access(args.scratchDirName, os.W_OK):
+    print(args.scratchDirName + " is not a writable directory.")
+    sys.exit(1)
 
 pw = getpass.getpass()
 g = Github(args.githubUsername, pw)
 
 org= g.get_organization("UCSB-CS56-S13")
 
-addStudentsFromFileToTeams(g,org,args.infileName)
-
-# call findTeam with refresh=True to refresh the cache
-# otherwise, the newly created teams won't be found when
-# findTeam is called in createLabRepo
-
-allStudentsTeam = findTeam(org,"AllStudents",refresh=True)
-
-createLabRepo(g,org,args.infileName,"lab00")
-pushFilesToRepo(g,org,"lab00","",args.scratchDirName)
-
-
-
-
-
-
-
-
-
-
-        
-
+updateStudentsFromFileForLab(g,org,
+                             args.infileName,args.lab,args.scratchDirName,args.firstName)
 
 
 

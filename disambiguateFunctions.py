@@ -103,7 +103,7 @@ def convertUserList(csvFile):
     
 
     for user in userList:
-        user["first"] = user["first"].translate(maketrans(" ","_"));
+        user["first"] = user["first"].strip().translate(maketrans(" ","_"));
 
     return userList
         
