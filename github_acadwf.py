@@ -69,7 +69,7 @@ def addStudentsFromFileToTeams(g,org,infileName):
     userList = getUserList(infileName)
     
     for line in userList:
-        result = addStudentToTeams(g,org,
+        studentTeam = addStudentToTeams(g,org,
                           line['last'],
                           line['first'],
                           line['github'],
@@ -91,7 +91,7 @@ def updateStudentsFromFileForLab(g,org,infileName,lab,scratchDirName,firstName='
         
         if ( firstName=="" or line['first']==firstName ):
         
-            result = addStudentToTeams(g,org,
+            studentTeam = addStudentToTeams(g,org,
                                        line['last'],
                                        line['first'],
                                        line['github'],
@@ -99,8 +99,10 @@ def updateStudentsFromFileForLab(g,org,infileName,lab,scratchDirName,firstName='
                                        line['csil'])
             
             result = createLabRepoForThisUser(g,org,lab,
-                                              line['last'],line['first'],line['github'],
-                                              line['email'],line['csil'])
+                                              line['last'],line['first'],
+                                              line['github'],
+                                              line['email'],line['csil'],
+                                              studentTeam)
             
             if (result):
                 pushFilesToRepo(g,org,lab,line['first'],scratchDirName)
@@ -117,7 +119,7 @@ def updateAllStudentsFromFileForLab(g,org,infileName,lab,scratchDirName):
 
     for line in userList:
         
-        result = addStudentToTeams(g,org,
+        studentTeam = addStudentToTeams(g,org,
                                        line['last'],
                           line['first'],
                           line['github'],
@@ -126,7 +128,8 @@ def updateAllStudentsFromFileForLab(g,org,infileName,lab,scratchDirName):
 
         result = createLabRepoForThisUser(g,org,lab,
                                  line['last'],line['first'],line['github'],
-                                 line['email'],line['csil'])
+                                 line['email'],line['csil'],
+                                 studentTeam)
         
         if (result):
             pushFilesToRepo(g,org,lab,line['first'],scratchDirName)
@@ -152,7 +155,8 @@ def addUserToTeam(team,user,quiet=False):
 
 def addStudentToTeams(g,org,lastName,firstName,githubUser,umail,csil):
     """
-    return True if new, False if everthing already existed.
+    return the team if it was created or found, and user is member 
+    Otherwise False
     Only creates team and adds if wasn't already on the teams
     """
 
@@ -160,14 +164,11 @@ def addStudentToTeams(g,org,lastName,firstName,githubUser,umail,csil):
             firstName,lastName,githubUser),end='')
 
     studentTeam = getStudentFirstNameTeam(org, firstName)
+
     if (studentTeam != False):
         print("Team {0} exists...".format(studentTeam.name),end='')
     else:
         studentTeam = createTeamStudentFirstNameTeam(org,firstName)
-        from types import NoneType
-        if type(studentTeam)==NoneType:
-            print("Error creating student first name team for {0}".format(firstName))
-            sys.exit(1)
     
 
     studentGithubUser = findUser(g,githubUser)
@@ -180,11 +181,12 @@ def addStudentToTeams(g,org,lastName,firstName,githubUser,umail,csil):
     if (result):
         result = addUserToTeam(
             getAllStudentsTeam(org),studentGithubUser,quiet=False)
-    
-    return result
+        return studentTeam
+    else:
+        return False
                
-def  getStudentFirstNameTeam(org,firstName):
-    return findTeam(org,formatStudentTeamName(firstName))
+def  getStudentFirstNameTeam(org,firstName,refresh=False):
+    return findTeam(org,formatStudentTeamName(firstName),refresh)
 
 def  getAllStudentsTeam(org):
     return findTeam(org,"AllStudents")
@@ -255,7 +257,8 @@ def createLabRepo(g,org,infileName,lab):
 def createLabRepoForThisUser(g,
                              org,
                              lab,
-                             lastName,firstName,githubUser,umail,csil):
+                             lastName,firstName,githubUser,umail,csil,
+                             team=False):
    
 
     print(firstName + "\t" + lastName + "\t" + githubUser);
@@ -268,15 +271,19 @@ def createLabRepoForThisUser(g,
 
     teamName = formatStudentTeamName(firstName)
 
-    githubTeamObject = findTeam(org,teamName);
+    if (team==False):
+        team = findTeam(org,teamName);
 
-    if (githubTeamObject == False):
+    if (team==False):
+        team = findTeam(org,teamName,refresh=True);
+
+    if (team == False):
         print("ERROR: could not find team: " + teamName)
         print("RUN THE addStudentsToTeams script first!")
         return False
     
     return createRepoForOrg(org,lab,
-                            githubUserObject,githubTeamObject,firstName,csil)
+                            githubUserObject,team,firstName,csil)
 
     
 
@@ -353,6 +360,7 @@ def createTeamStudentFirstNameTeam(org,firstName,quiet=False):
                          "push");
        if not quiet:
            print(" team {0} created...".format(teamName),end='')
+           return team
     except GithubException as e:
        if (e.data['errors'][0]['code']=='already_exists'):
           if not quiet:
@@ -367,14 +375,17 @@ def createTeamStudentFirstNameTeam(org,firstName,quiet=False):
 
     if team==False:
        team = findTeam(org,teamName)
+       return team
      
     if team==False:
        if not quiet:
            print(
            "ERROR: team {0} could not be created and was not found".format(
                teamName))
-       return False
+    
+    return False
         
+    
 
 def findTeam(org,teamName,refresh=False):
 
