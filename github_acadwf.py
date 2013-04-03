@@ -362,7 +362,8 @@ def createTeamStudentFirstNameTeam(org,firstName,quiet=False):
            print(" team {0} created...".format(teamName),end='')
            return team
     except GithubException as e:
-       if (e.data['errors'][0]['code']=='already_exists'):
+       
+       if ('errors' in e.data and e.data['errors'][0]['code']=='already_exists'):
           if not quiet:
               print(" team {0} already exists...".format(teamName),
                          end='') 
