@@ -168,7 +168,8 @@ def addStudentToTeams(g,org,lastName,firstName,githubUser,umail,csil):
     if (studentTeam != False):
         print("Team {0} exists...".format(studentTeam.name),end='')
     else:
-        studentTeam = createTeamStudentFirstNameTeam(org,firstName)
+        studentTeam = createTeam(org,
+                                 formatStudentTeamName(firstName))
     
 
     studentGithubUser = findUser(g,githubUser)
@@ -207,7 +208,8 @@ def createStudentFirstNameTeamAndAddStudent(g,org,
     if (user==False):
        return
 
-    team = createTeamStudentFirstNameTeam(org,firstName)
+    team = createTeam(org,
+                      formatStudentTeamName(firstName))
     if (team==False):
        return
 
@@ -343,13 +345,16 @@ def formatStudentTeamName(firstName):
        return "Student_" + firstName  # name -- string
 
 
-def createTeamStudentFirstNameTeam(org,firstName,quiet=False):
-    "Only creates the team---doesn't add the student as a member"
+def createTeam(org,teamName,quiet=False):
+    """
+    Only creates the team---doesn't add any members.
+    Returns the created team.
+    If team already exists, returns reference to that team object.
+    Returns False if team can't be created and can't be found.
+    """
 
     addPyGithubToPath()
     from github import GithubException
-
-    teamName = formatStudentTeamName(firstName)
 
     # Try to create the team
 
@@ -358,8 +363,9 @@ def createTeamStudentFirstNameTeam(org,firstName,quiet=False):
        team = org.create_team(teamName,
                          [],
                          "push");
-       if not quiet:
-           print(" team {0} created...".format(teamName),end='')
+       if team!=False:
+           if not quiet:
+               print(" team {0} created...".format(teamName),end='')
            return team
     except GithubException as e:
        
@@ -369,21 +375,23 @@ def createTeamStudentFirstNameTeam(org,firstName,quiet=False):
                          end='') 
        else:
           print (e)
-          
        
     # If the create failed, try to find the team by name
     # This is our own function and does NOT throw an exception on failure
 
-    if team==False:
-       team = findTeam(org,teamName)
-       return team
+    team = findTeam(org,teamName)
+    if team!=False:
+        return team
+
+    team = findTeam(org,teamName,refresh=True)
+    if team!=False:
+        return team
      
-    if team==False:
-       if not quiet:
-           print(
-           "ERROR: team {0} could not be created and was not found".format(
-               teamName))
-    
+    if not quiet:
+        print(
+            "ERROR: team {0} could not be created and was not found".format(
+                teamName))
+        
     return False
         
     
@@ -408,3 +416,29 @@ def findTeam(org,teamName,refresh=False):
     
     return False
 
+
+def addTeamsForPairsInFile(g,org,studentFileName,pairFileName):
+    
+    #addPyGithubToPath()
+    from disambiguateFunctions import getUserList
+    from disambiguateFunctions import getPairList
+    
+    userList = getUserList(studentFileName)
+
+    pairList = getPairList(userList,pairFileName)
+    
+    for pair in pairList:
+        print("\nCreating team {0}...".format(pair["teamName"]))
+        pairTeam = createTeam(org,pair["teamName"])
+        user1 = findUser(g,pair["user1"]["github"])
+        if (user1==False):
+            raise Exception("Could not find github user {0}".pair["user1"]["github"])
+
+        addUserToTeam(pairTeam,user1)
+        user2 = findUser(g,pair["user2"]["github"])
+        if (user2==False):
+            raise Exception("Could not find github user {0}".pair["user2"]["github"])
+        addUserToTeam(pairTeam,user2)
+        
+
+    

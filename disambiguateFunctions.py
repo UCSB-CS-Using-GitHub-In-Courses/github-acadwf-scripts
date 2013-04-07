@@ -106,7 +106,56 @@ def convertUserList(csvFile):
         user["first"] = user["first"].strip().translate(maketrans(" ","_"));
 
     return userList
+
+def makeUserLookupDictByGithubId(userList):
+    """
+    userList is a list of dictionaries with keys first,last,github,email,csil.
+    returned value is a dictionary where the keys are the github ids,
+      and the values are the original dictionaries with first,last,github,email,csil
+    """
+
+    newDict = {}
+    for user in userList:
+        if user['github'] in newDict:
+            raise Exception("duplicate github user {0}".format(user['github']))
+        newDict[user['github']]=user
+
+    return newDict
+
+def convertPairList(userList,csvFile):
+    """
+    userList is a list of dictionaries with keys first,last,github,email,csil
+    csvFile is a list of dictionaries with keys Partner1_GithubID,Partner2_GithubID,labnumber
+    
+    returned value should be a list of dictionaries with keys teamName,user1,user2, where user1 and user2 are the elements fromn userlist where the github ids match.
+    """
+
+    pairList = []
+    userLookupDict = makeUserLookupDictByGithubId(userList)
+    for line in csvFile:
         
+        if not (line['Partner1_GithubID'] in userLookupDict):
+            raise Exception("Partner1_GithubID from pair file not found in user list: {0}".format(line['Partner1_GithubID']))
+        
+        if not (line['Partner2_GithubID'] in userLookupDict):
+            raise Exception("Partner2_GithubID from pair file not found in user list: {0}".format(line['Partner2_GithubID']))
+        
+        team = {}
+        user1 = userLookupDict[line['Partner1_GithubID']]
+        user2 = userLookupDict[line['Partner2_GithubID']]
+        if (user1["first"] > user2["first"]): 
+            # Swap if out of order
+            temp = user1
+            user1 = user2
+            user2 = temp
+        team["user1"] = user1
+        team["user2"] = user2
+        team["teamName"]="Pair_" + user1['first'] + "_" + user2['first']
+        
+        pairList.append(team)
+        
+    return pairList
+
 def getUserList(csvFilename):
 
     with open(csvFilename,'r') as f:
@@ -117,6 +166,15 @@ def getUserList(csvFilename):
         newUserList = disambiguateAllFirstNames(userList)
 
         return newUserList
+
+def getPairList(userList,csvFilename):
+
+    with open(csvFilename,'r') as f:
+        csvFile = csv.DictReader(f,delimiter=',', quotechar='"')
+    
+        pairList = convertPairList(userList,csvFile)
+        
+        return pairList
 
 class TestSequenceFunctions(unittest.TestCase):
 
