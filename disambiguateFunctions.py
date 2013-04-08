@@ -89,7 +89,7 @@ def findIndicesOfMatchingFirstNames(userList,name):
                           
 
 def makeUserDict(first,last,github,email,csil):
-    return {'first': first, 'last': last, 'github': github, 'email':email, 'csil':csil }
+    return {'first': first, 'last': last, 'github': github.lower(), 'email':email.lower(), 'csil':csil.lower() }
 
 
 def convertUserList(csvFile):
@@ -133,7 +133,8 @@ def convertPairList(userList,csvFile):
     pairList = []
     userLookupDict = makeUserLookupDictByGithubId(userList)
     for line in csvFile:
-        
+        line['Partner1_GithubID']=line['Partner1_GithubID'].lower()
+        line['Partner2_GithubID']=line['Partner2_GithubID'].lower()
         if not (line['Partner1_GithubID'] in userLookupDict):
             raise Exception("Partner1_GithubID from pair file not found in user list: {0}".format(line['Partner1_GithubID']))
         

@@ -24,7 +24,7 @@ from github import Github
 from github import GithubException
                       
 defaultInputFileName =  '../CS56-S13-data/CS56 S13 Github Userids (Responses) - Form Responses.csv'
-defaultPairFileName =  '../CS56-S13-data/CS56-S13-Github-Pair-Team-Registration (Responses) - Form Responses.csv'
+defaultPairFileName =  '../CS56-S13-data/pairs.csv'
 
 parser = argparse.ArgumentParser(description='Setup teams for pairs')
 
