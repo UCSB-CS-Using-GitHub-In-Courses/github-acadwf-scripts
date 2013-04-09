@@ -33,11 +33,8 @@ fi
 
 git pull 
 
-for f in $protoDir/* 
-do
-  cp $f .
-  git add `basename $f`
-done
+cp -r $protoDir/* .
+git add .
 
 
 if [ -f $protoDir/.gitignore ] ; then
