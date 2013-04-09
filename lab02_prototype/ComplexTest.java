@@ -17,59 +17,60 @@ public class ComplexTest
     // we'll pass this as the last value of every assertEquals()
     // call that is done on double values to allow for roundoff error
     
-   public static final double TOL = 0.00001;
+    public static final double TOL = 0.00001;
     
-   @Test public void testNoArgConstructor()
+    @Test public void testNoArgConstructor()
     {
         // the no arg constructor should give us zero for
         // both imaginary and real parts
         Complex c = new Complex();
-        assertEquals(0.0,c.getReal(),TOL);
-        assertEquals(0.0,c.getImag(),TOL);
+        // TODO: UNCOMMENT! assertEquals(0.0,c.getReal(),TOL);
+        // TODO: UNCOMMENT! assertEquals(0.0,c.getImag(),TOL);
 	
     }
     
-   @Test public void testTwoArgConstructor()
-   {
-        // the no arg constructor should give us zero for
-        // both imaginary and real parts
-        Complex c = new Complex( 1.2, -3.4 );
-        assertEquals( 1.2, c.getReal(), TOL);
-        assertEquals( -3.4, c.getImag(), TOL);
+    @Test public void testTwoArgConstructor()
+    {
+	// the no arg constructor should give us zero for
+	// both imaginary and real parts
+	// TODO: UNCOMMENT! Complex c = new Complex( 1.2, -3.4 );
+	// TODO: UNCOMMENT! assertEquals( 1.2, c.getReal(), TOL);
+	// TODO: UNCOMMENT! assertEquals( -3.4, c.getImag(), TOL);
     }
-
-   @Test public void testSetters()
-   {
-       // the no arg constructor should give us zero for
-       // both imaginary and real parts
-       Complex c = new Complex();
-       c.setReal(-3.4);
-       c.setImag(1.2);
-       assertEquals( -3.4, c.getReal(), TOL);
-       assertEquals( 1.2, c.getImag(), TOL);
-   }
+    
+    @Test public void testSetters()
+    {
+	// the no arg constructor should give us zero for
+	// both imaginary and real parts
+	Complex c = new Complex();
+	// TODO: UNCOMMENT! c.setReal(-3.4);
+	// TODO: UNCOMMENT! c.setImag(1.2);
+	// TODO: UNCOMMENT! assertEquals( -3.4, c.getReal(), TOL);
+	// TODO: UNCOMMENT! assertEquals( 1.2, c.getImag(), TOL);
+    }
     
     
-   @Test public void testToString1()
+    @Test public void testToString1()
     {
         Complex c = new Complex();
         assertEquals("0.0 + 0.0i",c.toString());
     }
     
-   @Test public void testToString2()
-   {
-       // the no arg constructor should give us zero for
-       // both imaginary and real parts
-       Complex c = new Complex(1.2, -3.4);
-       assertEquals("1.2 + -3.4i",c.toString());
-   }
+    @Test public void testToString2()
+    {
+	// the no arg constructor should give us zero for
+	// both imaginary and real parts
+	// TODO: UNCOMMENT! Complex c = new Complex(1.2, -3.4);
+	// TODO: UNCOMMENT! assertEquals("1.2 + -3.4i",c.toString());
+    }
     
-   @Test public void testToString3()
+    @Test public void testToString3()
     {
         // the no arg constructor should give us zero for
         // both imaginary and real parts
-        Complex c = new Complex(2.0, 3.0);
-        assertEquals("2.0 + 3.0i",c.toString());
+                                                                                                                                              
+	// TODO: UNCOMMENT! Complex c = new Complex(2.0, 3.0);
+	// TODO: UNCOMMENT! assertEquals("2.0 + 3.0i",c.toString());
     }
     
 }
