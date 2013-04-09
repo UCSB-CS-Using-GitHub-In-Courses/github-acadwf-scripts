@@ -2,7 +2,9 @@
 /**
  * A complex number with a real and imaginary part
  * 
- * @author Phill Conrad, and (insert your name here)
+ * @author Phill Conrad
+ * @author Insert your name here
+ * @author If working in pair, insert 2nd pair here, otherwise delete this line
  * @version 2013/04/09 for lab02, cs56, s13
  */
 public class Complex
