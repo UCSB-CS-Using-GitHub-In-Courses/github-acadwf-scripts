@@ -133,8 +133,8 @@ def convertPairList(userList,csvFile):
     pairList = []
     userLookupDict = makeUserLookupDictByGithubId(userList)
     for line in csvFile:
-        line['Partner1_GithubID']=line['Partner1_GithubID'].lower()
-        line['Partner2_GithubID']=line['Partner2_GithubID'].lower()
+        line['Partner1_GithubID']=line['Partner1_GithubID'].lower().strip()
+        line['Partner2_GithubID']=line['Partner2_GithubID'].lower().strip()
         if not (line['Partner1_GithubID'] in userLookupDict):
             raise Exception("Partner1_GithubID from pair file not found in user list: {0}".format(line['Partner1_GithubID']))
         
