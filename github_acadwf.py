@@ -49,9 +49,34 @@ def pushFilesToRepo(g,org,lab,firstName,scratchDirName):
                 populateRepo(repo,protoDirName,scratchDirName)
             
 
+def pushFilesToPairRepo(g,org,lab,team,scratchDirName):
 
+    addPyGithubToPath()
+    from github import GithubException
 
+    import os
 
+    protoDirName = lab + "_prototype"
+    
+    # check to see if protoDirName exists.  If not, bail
+    
+    if (not os.path.isdir(protoDirName)):
+        raise Exception(protoDirName + " does not exist.")
+
+    if (not os.path.isdir(scratchDirName)):
+        raise Exception(scratchDirName + " does not exist.")
+
+    protoDirName = os.path.abspath(protoDirName)
+    scratchDirName = os.path.abspath(scratchDirName)
+
+    
+    try:
+        repoName = (lab + "_" + team.name)
+        repo = org.get_repo(repoName)
+        populateRepo(repo,protoDirName,scratchDirName)
+    except GithubException as ghe:
+        print("Could not find repo " + repoName + ":" + str(ghe))
+            
 
 
 
@@ -440,5 +465,70 @@ def addTeamsForPairsInFile(g,org,studentFileName,pairFileName):
             raise Exception("Could not find github user {0}".pair["user2"]["github"])
         addUserToTeam(pairTeam,user2)
         
+
+    
+
+def updatePairsForLab(g,org,lab,scratchDirName):
+
+    """
+    go through all Pair_First1_First2 teams and create a repo for each one for this
+    lab
+    """
+
+    addPyGithubToPath()
+    from disambiguateFunctions import getUserList
+
+    allTeams = org.get_teams();
+    
+    for team in allTeams:
+        
+        if team.name.startswith("Pair_"):
+            print("\nTeam: " + team.name,end='')
+            result = createLabRepoForThisPairTeam(g,org,lab,team)
+            
+            if (result):
+                pushFilesToPairRepo(g,org,lab,team,scratchDirName)
+                
+        
+
+
+def createLabRepoForThisPairTeam(g,
+                             org,
+                             lab,
+                             team):
+
+    print("Creating repo for " + team.name + "...",end='')
+    
+    return createRepoForPairTeam(org,lab,team)
+
+def createRepoForPairTeam(org,labNumber,team):
+
+    addPyGithubToPath()
+    from github import GithubException
+
+
+    desc = "Github repo for " + labNumber + " for " + team.name
+    repoName = labNumber + "_" + team.name  # name -- string
+    try:  
+        repo = org.create_repo(
+            repoName,
+            labNumber + " for CS56, S13 for " + team.name, # description 
+            "http://www.cs.ucsb.edu/~pconrad/cs56", # homepage -- string
+            True, # private -- bool
+            True, # has_issues -- bool
+            True, # has_wiki -- bool
+            True, # has_downloads -- bool
+            team_id=team,
+            auto_init=True,
+            gitignore_template="Java")
+        print(" Created repo "+repoName)
+        return True
+    except GithubException as e:
+       if 'errors' in e.data and 'message' in e.data['errors'][0] and e.data['errors'][0]['message']=='name already exists on this account':
+           print(" repo {0} already exists".format(repoName))
+       else:
+           print (e)
+
+    return False
 
     

@@ -37,7 +37,7 @@ public class Complex
     /**
      * set the imaginary part
      * 
-     * @param  r   the new imaginary part
+     * @param  i   the new imaginary part
      */
 
     
