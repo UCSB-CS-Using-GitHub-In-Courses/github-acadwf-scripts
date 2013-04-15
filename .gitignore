@@ -1,3 +1,7 @@
+# labSubmissions is a directory for pulling the contents of repos that 
+# represent the closed source repos submitted by students
+labSubmissions/*
+# scratchRepos is temp space for populating student repos in the first place
 scratchRepos/*
 *~
 *.py[cod]
