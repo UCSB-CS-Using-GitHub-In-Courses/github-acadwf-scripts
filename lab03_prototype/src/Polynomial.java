@@ -377,7 +377,7 @@ public class Polynomial extends ArrayList<Integer> {
 
     /** Given an int [] of coefficients from lowest to highest
 	degree (where the index in the array matches the power of the
-	x term), find the index of the highest degree non-zero term.
+	x term), find the degree of the polynomial (ignoring trailing terms with a coefficient of zero)
 	If all terms are zero, return 0.
 
 	This is a utility method that may be useful in converting
@@ -387,7 +387,7 @@ public class Polynomial extends ArrayList<Integer> {
 	Polynomial methods.
 	
 	@param coeffsLowToHigh coefficients of a polynomial in order from lowest degree to highest degree.  May have trailing zeros.
-
+	@return the degree of the polynomial as an int, ignoring trailing terms with a coefficient of zero
 
     */
 
@@ -398,7 +398,7 @@ public class Polynomial extends ArrayList<Integer> {
 
     /** Given an int [] of coefficients from highest to lowest
 	degree (the formal used for input to the Polynomial constructor),
-	find the index of the highest degree non-zero term.
+	find the degree of the polynomial (ignoring leading terms with a coefficient of zero)
 	If all terms are zero, return 0.
 
 	This is a utility method that may be useful in converting
@@ -408,7 +408,7 @@ public class Polynomial extends ArrayList<Integer> {
 	Polynomial methods.
 	
 	@param coeffsHighToLow coefficients of a polynomial in order from highest degree first to lowest degree last.  May have leading zeros.
-	@return array of coefficients of a polynomial from lowest from highest.  No leading zeros.
+	@return the degree of the polynomial as an int, ignoring leading terms with a coefficient of zero
 
     */
 
