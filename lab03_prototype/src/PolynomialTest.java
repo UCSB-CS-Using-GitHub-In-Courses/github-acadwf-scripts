@@ -40,15 +40,12 @@ public class PolynomialTest
     
    @Test public void testConstructorIntArray()
    {
-        // the no arg constructor should give us zero for
-        // both imaginary and real parts
-       //       int [] coeffs = {2,1,5};
        Polynomial p = new Polynomial(new int[] {2,1,5});
-        assertEquals(2, p.getDegree());
-        assertEquals(2, (int) p.get(2));
-        assertEquals(1, (int) p.get(1));
-        assertEquals(5, (int) p.get(0));
-    }
+       assertEquals(2, p.getDegree());
+       assertEquals(2, (int) p.get(2));
+       assertEquals(1, (int) p.get(1));
+       assertEquals(5, (int) p.get(0));
+   }
 
     /**
        test toString
