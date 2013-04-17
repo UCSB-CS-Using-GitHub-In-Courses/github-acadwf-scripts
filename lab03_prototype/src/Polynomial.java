@@ -5,8 +5,19 @@ import java.util.regex.Matcher;
 import java.text.DecimalFormat;
 
 
-/** Polynomial represents a polynomial from algebra.
-    e.g. 4x^3 + 3x^2 - 5x + 2
+/** <p>Polynomial represents a polynomial from algebra with integer 
+    coefficients.   e.g. 4x<sup>3</sup> + 3x<sup>2</sup> - 5x + 2</p>
+
+    <p>Polynomial extends ArrayList<Integer>, and contains the coefficients
+    of the polynomial, such that for Polynomial p, p.get(i) returns
+    the coefficient of the x<sup>i<sup> term.    p.get(0) returns
+    the constant term.</p>
+
+    <p>For a Polynomial object p that represents a polynomial of degree
+    d, (i.e. where x<sup>d</sup> is the highest order term with a
+    non-zero coefficient), invoking p.get(k) where k&gt;d should
+    result in an IndexOutOfBoundsException; that is, the ArrayList
+    should be of size exactly d+1.</p>
 
 */
 
@@ -20,6 +31,7 @@ public class Polynomial extends ArrayList<Integer> {
 
     /**
        no-arg constructor returns a polynomial of degree 1, with value 0
+       
      */
     
     public Polynomial() {
