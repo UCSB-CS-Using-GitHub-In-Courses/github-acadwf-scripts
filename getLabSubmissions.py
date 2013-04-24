@@ -8,6 +8,7 @@ if not os.access(labSubmissionsDir, os.W_OK):
 import getpass
 import sys
 import argparse
+from github_acadwf import pullRepoForGrading
 
 # In the main directory of the repo where you are developing with PyGithub,
 # type:
@@ -23,14 +24,19 @@ sys.path.append("./PyGithub");
 from github import Github
 from github import GithubException
 
-parser = argparse.ArgumentParser(description='List all repos for an org')
-parser.add_argument('orgName',help='github Organization name')
-
+parser = argparse.ArgumentParser(description='Pull repos for grading that start with a certain prefix')
+parser.add_argument('prefix',help='prefix e.g. lab00')
+parser.add_argument('-u','--githubUsername',
+                    help="github username, default is current OS user",
+                    default=getpass.getuser())
+parser.add_argument('-o','--orgName',
+                    help="organization e.g. UCSB-CS56-S13",
+                    default='UCSB-CS56-S13')
 args = parser.parse_args()
 
-username = raw_input("Github Username:")
+username = args.githubUsername
 pw = getpass.getpass()
-g = Github(username, pw)
+g = Github(username, pw, user_agent='PyGithub')
 
 print("All repos for organization: ",args.orgName)
 
@@ -42,5 +48,6 @@ org = g.get_organization(args.orgName)
 repos = org.get_repos()
 
 for repo in repos:
-    print (repo.name)
-
+  if repo.name.startswith(args.prefix):
+    print(repo.name)
+    pullRepoForGrading(repo,labSubmissionsDir+'/'+args.prefix)

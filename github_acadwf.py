@@ -11,6 +11,12 @@ def populateRepo(repo,protoDir,scratchDir):
     print ("Calling " + " ".join(callList))
     subprocess.call(callList)
 
+def pullRepoForGrading(repo,gradingDir):
+    import subprocess
+    callList = ["./pullRepoForGrading.sh",repo.name,repo.ssh_url,gradingDir]
+    print ("Calling " + " ".join(callList))
+    subprocess.call(callList)
+
 def pushFilesToRepo(g,org,lab,firstName,scratchDirName):
 
     addPyGithubToPath()
