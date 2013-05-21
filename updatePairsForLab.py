@@ -40,6 +40,11 @@ parser.add_argument('-s','--scratchDirName',
                     help="scratch directory to clone repos in while doing work",
                     default="./scratchRepos")
 
+parser.add_argument('-t','--teamPrefix', 
+                    help="prefix of teams to create",
+                    default="")
+
+
 args = parser.parse_args()
 
 if not os.access(args.scratchDirName, os.W_OK):
@@ -47,11 +52,11 @@ if not os.access(args.scratchDirName, os.W_OK):
     sys.exit(1)
 
 pw = getpass.getpass()
-g = Github(args.githubUsername, pw)
+g = Github(args.githubUsername, pw, user_agent="PyGithub")
 
 org= g.get_organization("UCSB-CS56-S13")
 
-updatePairsForLab(g,org,args.lab,args.scratchDirName)
+updatePairsForLab(g,org,args.lab,args.scratchDirName, args.teamPrefix)
 
 
 

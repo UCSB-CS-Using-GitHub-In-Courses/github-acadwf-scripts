@@ -474,7 +474,7 @@ def addTeamsForPairsInFile(g,org,studentFileName,pairFileName):
 
     
 
-def updatePairsForLab(g,org,lab,scratchDirName):
+def updatePairsForLab(g,org,lab,scratchDirName,prefix=""):
 
     """
     go through all Pair_First1_First2 teams and create a repo for each one for this
@@ -484,11 +484,17 @@ def updatePairsForLab(g,org,lab,scratchDirName):
     addPyGithubToPath()
     from disambiguateFunctions import getUserList
 
-    allTeams = org.get_teams();
+    allTeams = org.get_teams()
+
+    # If user didn't pass in prefix, then make teams for ALL pairs,
+    # that is, every team that starts with Pair_  otherwise,
+    # make for every team that starts with prefix
+
+    startsWith =  ("Pair_" if (prefix=="") else prefix)
     
     for team in allTeams:
         
-        if team.name.startswith("Pair_"):
+        if team.name.startswith(startsWith):
             print("\nTeam: " + team.name,end='')
             result = createLabRepoForThisPairTeam(g,org,lab,team)
             

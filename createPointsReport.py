@@ -29,7 +29,7 @@ args = parser.parse_args()
 
 username = raw_input("Github Username:")
 pw = getpass.getpass()
-g = Github(username, pw)
+g = Github(username, pw, user_agent="PyGithub")
 
 print("All repos for organization: ",args.orgName)
 

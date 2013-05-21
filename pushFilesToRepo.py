@@ -56,7 +56,7 @@ args = parser.parse_args()
 
 
 pw = getpass.getpass()
-g = Github(args.githubUsername, pw)
+g = Github(args.githubUsername, pw, user_agent="PyGithub")
 org= g.get_organization("UCSB-CS56-S13")
 
 pushFilesToRepo(g,org,args.lab,args.firstName,args.scratchDirName)
