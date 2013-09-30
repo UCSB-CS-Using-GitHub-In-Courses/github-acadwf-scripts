@@ -38,12 +38,29 @@ contribute as many repos as you need for academic use.
 So my suggestion is to overestimate by 10 to 20 percent, and then if/when you
 exhaust 80% of your private repos, ask for more.    
 
-2) Create a form similar to the one shown here---I suggest doing this
+2) You will need some source of information that lists the github ids of your students, and maps those to
+real names.
+
+The scripts can work either from a .csv file, or from a Google Docs Spreadsheet.
+
+The columns can be in any order, but the first row should have the following field names:
+
+"first"  for first name
+"last" for last name
+"github" for github userid
+"email" for email address
+
+You may have other fields if you like---those will be ignored.  NOTE: THIS IS NOT YET TRUE, BUT WHAT I WANT TO BE TRUE IN THE F13 VERSIONS OF THE SCRIPTS.
+
+Create a form similar to the one shown here---I suggest doing this
 using Google Drive (I have a sample script that grabs the data from
 the form) to collect github ids from your students and tie those back
 to "real names" and student ids.
 
 https://docs.google.com/forms/d/1icypz0MC67pUn9ZiXZV6tMCR6_P8Ejy2jBEZCuO_8Yg/viewform
+
+The scripts can use a .CSV file or a Google Doc 
+
 
 3) Ask your students to create their github account and fill out the
 form as soon as you can reach them---preferably before the quarter
@@ -108,9 +125,58 @@ That should clone the repository that contains the scripts.  There is one more t
 git submodule init
 git submodule update
 
-That should populate the PyGithub subdirectory with contents.
+That should populate the PyGithub subdirectory with contents.   That will allow the scripts to load PyGithub as needed.
 
-(6) Create a directory structure for your starting point files 
+
+Creating Student Teams
+======================
+
+The first step is to set up singleton pull/pull teams within the Organization, one for each student.
+
+Our naming convention for these is:
+
+Student_githubid
+
+e.g. 
+
+Student_csmith89
+Student_jennyjones23
+etc.
+
+We do this via the script addStudentsToTeams.py--instructions below.
+
+Why do I need do set up singleton teams?
+----------------------------------------
+ 
+It may seem counterintuitive to create "teams" that have just one member for each student.
+
+However, you NEED TO DO THIS.   The reason is that:
+
+* the way that github supplies "private repos" at no charge for academic courses is via an "Organization"
+* at present (as of Fall 2013) within "Organizations", the only way to manage private repo access is via "teams", not via individual users.  (If this changes, setting up these "singleton teams" might no longer be necessary).
+
+So,these singleton teams are the most straightforward way we've found to set up private repos that:
+
+* are accessible to the individual student, and to the instructional staff (instructor/TAs/graders), but NOT to anyone else
+* don't count against a students 'educataional quota' of five private github accounts, but against the "course" for which github provided free accounts.
+
+If there is another work flow that is simpler and accomplishes the same goals, we are interested to know!  Email us, or post a comment in our github repo.
+
+(1) Identify a source of data.
+
+The environment variable 
+
+TODO... CONTINUE FROM HERE.... 
+
+Creating Repositories for An Assignment--FIRST ASSIGNMENT OF COURSE
+===================================================================
+
+You should create student team  (and if applicable, pair teams and/or group teams) before doing this step.
+
+The first time you create repositories for an assignment in a given course, there is a bit of extra set up.   Subsequent
+assignment setup will be more straightforward.
+
+(1) Create a directory structure for your starting point files 
 
 NOTE: The Spring 2013 version of the software stored these in the same repo with the scripts.   In Fall 2013, I'm modifying the 
 scripts so that the location of these is determined by an environment variable.   That should make it easier to use the 
